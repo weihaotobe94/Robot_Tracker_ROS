@@ -1,0 +1,26 @@
+<launch>
+
+  <!--定义全局变量-->
+  <arg name="rgb_image" default="/camera/rgb/image_raw" doc="rgb image"/>
+  <arg name="depth_image" default="/camera/depth/image" doc="depth image"/>
+  <arg name="target_pose" default="/target_pose" doc="target position"/>
+  <arg name="robot_move" default="/cmd_vel" doc="robot move"/>
+  <arg name="config_file" default="$(find dashgo_tracker)/cfg/config_params.yaml"/>
+
+  <!--启动深度相机-->
+  <include file="$(find astra_launch)/launch/astra.launch"/>
+
+  <!--启动摄像头跟踪程序-->
+  <node name="depth_tracker" pkg="dashgo_depth" type="depth_tracker" output="screen">
+    <param name="sub_rgb_img" value="$(arg rgb_image)"/>
+    <param name="sub_depth_img" value="$(arg depth_image)"/>
+    <param name="pub_pose" value="$(arg target_pose)"/>
+  </node>
+
+  <!--启动位姿转换程序-->
+  <node name="depth_to_cmd" pkg="dashgo_depth" type="depth_to_cmd" respawn="true" output="screen">
+    <param name="sub_target_pos" value="$(arg target_pose)"/>
+    <param name="pub_cmd" value="$(arg robot_move)"/>
+  </node>
+
+</launch>
